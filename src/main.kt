@@ -7,21 +7,28 @@ import java.util.regex.Pattern
 val command = "cmd.exe /C ant dist"
 val targetPattern = Pattern.compile("^[a-zA-Z-]*:$")
 val infoPerfAnalyze = "info: PERF: ANALYZE:"
-val numberOfTests = 5
 
 fun main(args: Array<String>) {
-    val timestampsForTargets = runTests(numberOfTests)
-    println("=> Tests completed")
-    println("=> Tests number: $numberOfTests")
-    println("=> Analysis duration per target (all in ms):")
-    timestampsForTargets.forEach {
-        println("> ${it.first}")
-        println("  all values: ${it.second}")
-        val mean = it.second.sum() / numberOfTests
-        println("  mean: $mean")
-        val variance = it.second.map { Math.pow(it - mean, 2.0) }.sum() / numberOfTests
-        println("  variance: $variance")
+    if (args.size() == 0) {
+        println("Usage: <program name> <number of `ant dist` runs>")
     }
+    else try {
+        val numberOfTests = args.first().toInt()
+        println("=> `ant dist` will be run $numberOfTests times")
+        val timestampsForTargets = runTests(numberOfTests)
+        println("=> Tests completed")
+        println("=> Tests number: $numberOfTests")
+        println("=> Analysis duration per target (all in ms):")
+        timestampsForTargets.forEach {
+            println("> ${it.first}")
+            println("  all values: ${it.second}")
+            val mean = it.second.sum() / numberOfTests
+            println("  mean: $mean")
+            val variance = it.second.map { Math.pow(it - mean, 2.0) }.sum() / numberOfTests
+            println("  variance: $variance")
+        }
+    }
+    catch (e: NumberFormatException) { println("Error: parameter must be of integral value") }
 }
 
 fun cons<T>(x: T, xs: LinkedList<T>): LinkedList<T> { xs.addFirst(x); return xs }
